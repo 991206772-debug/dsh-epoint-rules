@@ -1,0 +1,4 @@
+interface:
+  display_name: "Epoint Design TDD Coder"
+  short_description: "骨架完成后按整需求自主规划并连续完成 Epoint 业务代码"
+  default_prompt: "Use $epoint-design-tdd-coder after the skeleton is ready: read coderIntakeRef and the full Story catalog, keep all Story/AC coverage in the plan, then follow the current Story detailRef for complete acceptance requirements, relevant code and company rules before implementing and verifying the behavior."

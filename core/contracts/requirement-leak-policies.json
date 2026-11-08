@@ -1,0 +1,84 @@
+{
+  "$schema": "requirement-leak-policies-v1",
+  "description": "需求阶段实现泄露检测策略契约。修改此文件可定制策略配置（severity、allowedAlternative、contextExemptions），无需改源码。matcher 逻辑由 leak-matchers/ 目录下的模块实现。",
+  "policies": [
+    {
+      "id": "REQUIREMENT_SQL_DETAIL_FORBIDDEN",
+      "matcherModule": "sql-detail",
+      "category": "数据实现边界",
+      "severity": "error",
+      "forbiddenExamples": ["CREATE TABLE", "INSERT INTO", "@Entity"],
+      "allowedAlternative": "只描述业务对象、业务属性含义、约束口径和信息缺口，不拍板物理表结构。",
+      "isSchemaSectionOnly": false
+    },
+    {
+      "id": "REQUIREMENT_COLUMN_TYPE_FORBIDDEN",
+      "matcherModule": "column-type",
+      "category": "数据实现边界",
+      "severity": "error",
+      "forbiddenExamples": ["VARCHAR(255)", "DATETIME"],
+      "allowedAlternative": "描述数据性质，例如：'长文本'、'创建时间'、'金额'",
+      "isSchemaSectionOnly": true
+    },
+    {
+      "id": "REQUIREMENT_PHYSICAL_SCHEMA_IDENTIFIER_FORBIDDEN",
+      "matcherModule": "physical-schema-identifier",
+      "category": "数据实现边界",
+      "severity": "error",
+      "forbiddenExamples": ["user_info", "order_detail"],
+      "allowedAlternative": "描述业务概念，例如：'用户信息'、'订单详情'",
+      "isSchemaSectionOnly": true
+    },
+    {
+      "id": "REQUIREMENT_SCHEMA_CONSTRAINT_FORBIDDEN",
+      "matcherModule": "schema-constraint",
+      "category": "数据实现边界",
+      "severity": "error",
+      "forbiddenExamples": ["PRIMARY KEY", "NOT NULL"],
+      "allowedAlternative": "描述业务规则，例如：'该项为必填'、'用户名不能重复'",
+      "isSchemaSectionOnly": true
+    },
+    {
+      "id": "REQUIREMENT_TABLE_SPLIT_FORBIDDEN",
+      "matcherModule": "table-split",
+      "category": "数据分层边界",
+      "severity": "error",
+      "forbiddenExamples": ["子表", "历史表"],
+      "allowedAlternative": "描述数据生命周期或关联关系，例如：'关联的从属数据'、'过往记录'",
+      "isSchemaSectionOnly": false
+    },
+    {
+      "id": "REQUIREMENT_HTTP_METHOD_FORBIDDEN",
+      "matcherModule": "http-method",
+      "category": "接口实现边界",
+      "severity": "error",
+      "forbiddenExamples": ["POST /api/save", "@PostMapping"],
+      "allowedAlternative": "描述操作意图，例如：'提交申请'、'查询列表'、'更新状态'",
+      "isSchemaSectionOnly": false,
+      "contextExemptions": [
+        {
+          "pattern": "(?:采用|使用)\\s*(?:GET|POST|PUT|DELETE|PATCH)\\s*(?:方式|方法|请求|协议)",
+          "reason": "描述外部接口协议事实（如'采用POST方式'），不是内部实现决策"
+        }
+      ]
+    },
+    {
+      "id": "REQUIREMENT_REST_PATH_FORBIDDEN",
+      "matcherModule": "rest-path",
+      "category": "接口实现边界",
+      "severity": "error",
+      "forbiddenExamples": ["/api/v1/users"],
+      "allowedAlternative": "只描述业务能力和调用方，不写路径、Mapping 或控制器实现",
+      "isSchemaSectionOnly": false
+    },
+    {
+      "id": "REQUIREMENT_CLASS_NAME_FORBIDDEN",
+      "matcherModule": "class-name",
+      "category": "代码命名边界",
+      "severity": "error",
+      "forbiddenExamples": ["UserService", "UserAction"],
+      "allowedAlternative": "描述逻辑职责，例如：'由用户服务组件处理'",
+      "isSchemaSectionOnly": false
+    }
+  ]
+}

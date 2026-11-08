@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Epoint Project Rules Pipeline",
+    "description": "Automated pipeline toolchain and specification closure for Epoint requirement analysis, design, and TDD coding."
+  }
+}

@@ -1,0 +1,12 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="4" y="4" width="56" height="56" rx="14" fill="#EBF3FF"/>
+  <rect x="5" y="5" width="54" height="54" rx="13" stroke="#2563EB" stroke-width="2"/>
+  <!-- Pipeline flow icon: 3 linked nodes -->
+  <circle cx="18" cy="32" r="6" fill="#2563EB"/>
+  <circle cx="32" cy="20" r="6" fill="#0284C7"/>
+  <circle cx="46" cy="32" r="6" fill="#10B981"/>
+  <!-- Connecting flow lines -->
+  <path d="M23 29L27 23" stroke="#2563EB" stroke-width="3" stroke-linecap="round"/>
+  <path d="M37 23L41 29" stroke="#0284C7" stroke-width="3" stroke-linecap="round"/>
+  <path d="M42 36L32 44L22 36" stroke="#2563EB" stroke-width="2.5" stroke-dasharray="3 3" stroke-linecap="round"/>
+</svg>

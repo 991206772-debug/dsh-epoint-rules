@@ -1,0 +1,35 @@
+{
+  "skillName": "epoint-design-tdd-coder",
+  "version": "2.0",
+  "globalRestrictions": {
+    "forbiddenToolCategories": [],
+    "forbiddenTools": [],
+    "forbiddenArgPatterns": [
+      {
+        "tool": "*",
+        "argField": "filePath",
+        "regex": "[\\\\/](?:projectrules|\\.project_repo|\\.knowledge_repo|gxhrules)[\\\\/]",
+        "reason": "规则库和团队知识库只能读取，不能修改。"
+      },
+      {
+        "tool": "*",
+        "argField": "filePath",
+        "regex": "(?:^|[\\\\/])(?:webapp[\\\\/](?:frame|rest|WEB-INF|META-INF|resources)|src[\\\\/]main[\\\\/]resources[\\\\/]spring)(?:[\\\\/]|$)",
+        "reason": "禁止修改公司框架目录和平台配置；业务代码只能写入当前需求的业务源码范围。"
+      },
+      {
+        "tool": "*",
+        "argField": "filePath",
+        "regex": "(?:code-state\\.json|design-tdd-plan\\.(?:md|json)|business-facts\\.json|relevant-rules\\.json|skeleton-compile-receipt\\.json|skeleton-manifests-ledger\\.json)$",
+        "reason": "事实、状态和骨架凭证是 Builder-owned 产物，只能读取；Coder 只允许写 demand-implementation-tasks.md 和当前需求业务源码及对应测试。"
+      },
+      {
+        "tool": "*",
+        "argField": "filePath",
+        "regex": "\\.jsp$",
+        "reason": "公司前端统一使用 HTML、MiniUI 和 Epoint API，禁止生成 JSP。"
+      }
+    ],
+    "blockReason": "骨架完成后由 Coder 读取整需求、本地工作包、骨架、规则和公司实践，自主落盘计划并连续编码。允许在项目内检索技术实例、运行验证命令和修改当前需求业务源码；仍禁止修改事实真值、平台目录、规则库和需求范围外的业务代码。"
+  }
+}

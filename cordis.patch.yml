@@ -1,0 +1,12 @@
+# Epoint政务BG流水线 bundle
+# 第一行：Host 插件本体（注册需求分析、设计、编码主线工具）
+# 第二行：注册 skills/ 目录作为 DSH 原生 filesystem Skill 来源
+- insert:
+    - id: dsh-epoint-rules
+      name: '@local/dsh-epoint-rules'
+    - id: dsh-epoint-rules-skill
+      name: '@deepseek-ai/dsh-skill-filesystem'
+      config:
+        providerName: epoint-rules-plugin
+        includeDefaultRoots: false
+        bundledSkillDir: !!js process.getBuiltinModule('node:path').join(process.getBuiltinModule('node:path').dirname(process.getBuiltinModule('node:module').createRequire(baseUrl).resolve('@local/dsh-epoint-rules/package.json')), 'skills')

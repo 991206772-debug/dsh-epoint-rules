@@ -1,0 +1,59 @@
+{
+  "name": "@local/dsh-epoint-rules",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.3.0"
+  },
+  "keywords": [
+    "dsh-plugin",
+    "epoint",
+    "workflow",
+    "tdd",
+    "requirement",
+    "design",
+    "rules"
+  ],
+  "description": "Epoint政务BG项目规范与需求分析-设计-编码全流程自动化流水线插件（原生 DSH 适配版）",
+  "scripts": {
+    "check": "node --check index.js"
+  },
+  "exports": {
+    ".": "./index.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "README.md",
+    "skills",
+    "core",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.4.0",
+    "@node-rs/jieba": "^2.0.1",
+    "js-yaml": "^4.1.1",
+    "node-cache": "^5.1.2"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "author": "991206772-debug",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/991206772-debug/dsh-epoint-rules.git"
+  },
+  "homepage": "https://github.com/991206772-debug/dsh-epoint-rules#readme",
+  "bugs": {
+    "url": "https://github.com/991206772-debug/dsh-epoint-rules/issues"
+  }
+}

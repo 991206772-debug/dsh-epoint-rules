@@ -1,0 +1,193 @@
+{
+  "skillName": "epoint-requirement-analyzer",
+  "version": "1.5",
+  "globalRestrictions": {
+    "forbiddenToolCategories": ["search", "command"],
+    "forbiddenTools": ["write", "edit_file", "edit_file_search_replace"],
+    "allowedTools": ["fs_write", "fs_append", "str_replace", "read_file", "view_files", "list_directory", "rule_expert"],
+    "allowedPathPrefixes": [
+      "<projectPath>/.ai-workspace/project/",
+      "<projectPath>/projectrules/",
+      "<projectPath>/.kiro/",
+      "<projectPath>/skills/",
+      "<projectPath>/AGENTS.md"
+    ],
+    "forbiddenArgPatterns": [
+      {
+        "tool": "*",
+        "argField": "filePath",
+        "regex": "\\.pipeline[\\\\/]+|\\.skeleton-input[\\\\/]+",
+        "reason": "epoint-requirement-analyzer 不得读写流水线和骨架中间产物，业务分析阶段无关"
+      },
+      {
+        "tool": "*",
+        "argField": "filePath",
+        "regex": "[\\\\/]demand[\\\\/]+需求分析\\.md$",
+        "reason": "需求分析.md 是 req_finalize_artifacts 在阶段收口时根据 analysis-state.json / stories.json / rule-pool.json 自动生成的人读展示。需求阶段过程态 LLM 只维护 analysis-state.json，禁止 fs_write/fs_append/str_replace 直接写或改需求分析.md。"
+      },
+      {
+        "tool": "*",
+        "argField": "file_path",
+        "regex": "[\\\\/]demand[\\\\/]+需求分析\\.md$",
+        "reason": "需求分析.md 是 req_finalize_artifacts 在阶段收口时根据 analysis-state.json / stories.json / rule-pool.json 自动生成的人读展示。需求阶段过程态 LLM 只维护 analysis-state.json，禁止 fs_write/fs_append/str_replace 直接写或改需求分析.md。"
+      },
+      {
+        "tool": "*",
+        "argField": "path",
+        "regex": "[\\\\/]demand[\\\\/]+需求分析\\.md$",
+        "reason": "需求分析.md 是 req_finalize_artifacts 在阶段收口时根据 analysis-state.json / stories.json / rule-pool.json 自动生成的人读展示。需求阶段过程态 LLM 只维护 analysis-state.json，禁止 fs_write/fs_append/str_replace 直接写或改需求分析.md。"
+      },
+      {
+        "tool": "*",
+        "argField": "filePath",
+        "regex": "[\\\\/]demand[\\\\/]+rule-pool\\.json$|[\\\\/]demand[\\\\/]+rule-recall-raw\\.md$|[\\\\/]demand[\\\\/]+rule-pool-draft-receipt\\.json$|[\\\\/]demand[\\\\/]+rule-pool-rule-stage-receipt\\.json$|[\\\\/]demand[\\\\/]+rule-pool-submit-receipt\\.json$",
+        "reason": "rule-pool.json / rule-recall-raw.md / rule-pool-*-receipt.json 由 MCP Builder 工具(req_rule_pool_build_rule_draft / req_rule_decision_submit / req_rule_pool_build_table_draft / req_table_decision_submit)独家写入;LLM 必须先调 req_rule_pool_build_rule_draft 生成规则草案,提交 keptRuleAliases 后调 req_rule_pool_build_table_draft 生成表候选草案,最后提交 keptTableNames/dropAll 由 Builder 落盘,禁止用 Write/fs_write/fs_append/str_replace/edit_file_search_replace 等工具直接写或改这些产物。"
+      },
+      {
+        "tool": "*",
+        "argField": "path",
+        "regex": "[\\\\/]demand[\\\\/]+rule-pool\\.json$|[\\\\/]demand[\\\\/]+rule-recall-raw\\.md$|[\\\\/]demand[\\\\/]+rule-pool-draft-receipt\\.json$|[\\\\/]demand[\\\\/]+rule-pool-rule-stage-receipt\\.json$|[\\\\/]demand[\\\\/]+rule-pool-submit-receipt\\.json$",
+        "reason": "rule-pool.json / rule-recall-raw.md / rule-pool-*-receipt.json 由 MCP Builder 工具(req_rule_pool_build_rule_draft / req_rule_decision_submit / req_rule_pool_build_table_draft / req_table_decision_submit)独家写入(path 入口物理拦截)。禁止直接写或改;按规则池 Builder 四步重跑。"
+      },
+      {
+        "tool": "*",
+        "argField": "filePath",
+        "regex": "[\\\\/]demand[\\\\/]+stories\\.json$|[\\\\/]demand[\\\\/]+stories-submit-receipt\\.json$",
+        "reason": "demand/stories.json 与 stories-submit-receipt.json 由 req_stories_submit 独家写入。磁盘上的 stories.json 手改不算且会破坏 hash——需要修 Story 时只改 analysis-state.json.stories,再按 nextActionCard.callTemplate 重调 req_stories_submit({projectPath, skillName}),禁止 fs_write/fs_append/str_replace 直接改这两份产物。"
+      },
+      {
+        "tool": "fs_write",
+        "argField": "path",
+        "regex": "[\\\\/]demand[\\\\/]+stories\\.json$|[\\\\/]demand[\\\\/]+stories-submit-receipt\\.json$",
+        "reason": "demand/stories.json 与 stories-submit-receipt.json 由 req_stories_submit 独家写入(fs_write.path 入口物理拦截)。磁盘改 stories.json 不会被认可。请修 analysis-state.json.stories 后按 nextActionCard.callTemplate 重调 req_stories_submit({projectPath, skillName})。"
+      },
+      {
+        "tool": "str_replace",
+        "argField": "path",
+        "regex": "[\\\\/]demand[\\\\/]+stories\\.json$|[\\\\/]demand[\\\\/]+stories-submit-receipt\\.json$",
+        "reason": "demand/stories.json 与 stories-submit-receipt.json 不允许 str_replace 增量改(path 入口物理拦截)——它们是 req_stories_submit 的 hash 锁定产物,任何手改都会触发后续 hash mismatch。需要修 Story 时只改 analysis-state.json.stories,再重调 req_stories_submit({projectPath, skillName})。"
+      },
+      {
+        "tool": "str_replace",
+        "argField": "filePath",
+        "regex": "[\\\\/]demand[\\\\/]+stories\\.json$|[\\\\/]demand[\\\\/]+stories-submit-receipt\\.json$",
+        "reason": "demand/stories.json 与 stories-submit-receipt.json 不允许 str_replace 增量改(filePath 入口物理拦截)——它们是 req_stories_submit 的 hash 锁定产物。需要修 Story 时只改 analysis-state.json.stories,再重调 req_stories_submit({projectPath, skillName})。"
+      },
+      {
+        "tool": "fs_append",
+        "argField": "path",
+        "regex": "[\\\\/]demand[\\\\/]+stories\\.json$|[\\\\/]demand[\\\\/]+stories-submit-receipt\\.json$",
+        "reason": "demand/stories.json 与 stories-submit-receipt.json 不允许 fs_append 追加(path 入口物理拦截)——它们是 req_stories_submit 落盘的完整 JSON,追加会破坏结构。需要增 Story 时只改 analysis-state.json.stories,再重调 req_stories_submit({projectPath, skillName})。"
+      },
+      {
+        "tool": "*",
+        "argField": "filePath",
+        "regex": "[\\\\/]demand[\\\\/]+analysis-state\\.json$",
+        "reason": "analysis-state.json 空白骨架由 req_prepare_context 的 Builder 独家创建。LLM 禁止 IDE 原生 Write/edit_file/edit_file_search_replace 全量或桥接式创建、改写；prepare 成功后只能用 str_replace 精确替换并保持 JSON 合法。"
+      },
+      {
+        "tool": "*",
+        "argField": "filePath",
+        "regex": "\\.active-demand$",
+        "reason": ".active-demand 是 Builder-owned 锚点，由 req_prepare_context 工具自动落盘（首次跑该需求时传 demandName 入参）。禁止 LLM 直接 fs_write/edit_file/Write/str_replace 创建或修改。"
+      },
+      {
+        "tool": "fs_write",
+        "argField": "path",
+        "regex": "\\.active-demand$",
+        "reason": "同上：fs_write 字段也拦。"
+      },
+      {
+        "tool": "AskUserQuestion",
+        "argField": "question",
+        "regex": "demandName|需求名称|本次需求.*叫|这次需求叫|本次任务.*叫|这次任务叫",
+        "reason": "禁止在派生 demandName 之前问用户——必须先从用户首句业务描述提炼 2-8 字中文业务名（如 '大厅地址管理'），调 req_prepare_context(demandName=...) 让 Builder 创建 .active-demand。仅在用户原话连业务名都无法提炼时才允许问用户。"
+      },
+      {
+        "tool": "list_directory",
+        "argField": "path",
+        "regex": "\\.ai-workspace[\\\\/]*$|[\\\\/]\\.ai-workspace[\\\\/]*$|[\\\\/]project[\\\\/]*$|^project[\\\\/]*$",
+        "reason": "禁止枚举 .ai-workspace 或 .ai-workspace/project 根。首跑时这些目录可能不存在；不要枚举试探，直接调 req_prepare_context(demandName) 让 Builder 创建。"
+      },
+      {
+        "tool": "file_search",
+        "argField": "file_pattern",
+        "regex": "\\.active-demand|\\.ai-workspace|^project[\\\\/]+\\*\\*",
+        "reason": "禁止 file_search 探测 .active-demand、.ai-workspace 或 project/** 通配——这些路径都能由 projectPath 精确推导，调 req_prepare_context 即可。首跑时这些路径不存在不是错误。"
+      },
+      {
+        "tool": "file_search",
+        "argField": "query",
+        "regex": "\\bUS\\d+\\b|confirmedAt|analysis-state\\.json|\\.ai-workspace|[\\\\/]demand[\\\\/]",
+        "reason": "禁止为了 Story 消化锚点定位而工作区搜索 StoryId/confirmedAt/analysis-state.json。请 read_file 精确读取 req_prepare_context.fixedPaths.analysisStatePath，在该 JSON 内定位 stories[storyId] 后 str_replace。"
+      },
+      {
+        "tool": "file_search",
+        "argField": "file_pattern",
+        "regex": "\\bUS\\d+\\b|confirmedAt|analysis-state\\.json|\\.ai-workspace|[\\\\/]demand[\\\\/]",
+        "reason": "禁止为了 Story 消化锚点定位而工作区搜索 StoryId/confirmedAt/analysis-state.json。请 read_file 精确读取 req_prepare_context.fixedPaths.analysisStatePath，在该 JSON 内定位 stories[storyId] 后 str_replace。"
+      },
+      {
+        "tool": "grep_search",
+        "argField": "query",
+        "regex": "\\bUS\\d+\\b|confirmedAt|analysis-state\\.json|\\.ai-workspace|[\\\\/]demand[\\\\/]",
+        "reason": "禁止为了 Story 消化锚点定位而 grep 搜索 StoryId/confirmedAt/analysis-state.json。请 read_file 精确读取 req_prepare_context.fixedPaths.analysisStatePath，在该 JSON 内定位 stories[storyId] 后 str_replace。"
+      },
+      {
+        "tool": "search_by_regex",
+        "argField": "query",
+        "regex": "\\bUS\\d+\\b|confirmedAt|analysis-state\\.json|\\.ai-workspace|[\\\\/]demand[\\\\/]",
+        "reason": "禁止为了 Story 消化锚点定位而正则搜索 StoryId/confirmedAt/analysis-state.json。请 read_file 精确读取 req_prepare_context.fixedPaths.analysisStatePath，在该 JSON 内定位 stories[storyId] 后 str_replace。"
+      },
+      {
+        "tool": "search_codebase",
+        "argField": "query",
+        "regex": "\\bUS\\d+\\b|confirmedAt|analysis-state\\.json|\\.ai-workspace|[\\\\/]demand[\\\\/]",
+        "reason": "禁止为了 Story 消化锚点定位而工作区搜索 StoryId/confirmedAt/analysis-state.json。请 read_file 精确读取 req_prepare_context.fixedPaths.analysisStatePath，在该 JSON 内定位 stories[storyId] 后 str_replace。"
+      },
+      {
+        "tool": "search_by_keyword",
+        "argField": "query",
+        "regex": "\\bUS\\d+\\b|confirmedAt|analysis-state\\.json|\\.ai-workspace|[\\\\/]demand[\\\\/]",
+        "reason": "禁止为了 Story 消化锚点定位而工作区搜索 StoryId/confirmedAt/analysis-state.json。请 read_file 精确读取 req_prepare_context.fixedPaths.analysisStatePath，在该 JSON 内定位 stories[storyId] 后 str_replace。"
+      },
+      {
+        "tool": "rule_expert",
+        "argField": "action",
+        "regex": "^[Ee][Xx][Ee][Cc][Uu][Tt][Ee]$",
+        "reason": "需求分析阶段禁止 rule_expert(action=execute)；规则池由 req_rule_pool_build_rule_draft / req_rule_decision_submit / req_rule_pool_build_table_draft / req_table_decision_submit Builder 生成，最终验证调用 req_finalize_artifacts。"
+      },
+      {
+        "tool": "rule_expert",
+        "argField": "parameters",
+        "regex": "\"action\"\\s*:\\s*\"[Ee][Xx][Ee][Cc][Uu][Tt][Ee]\"",
+        "reason": "需求分析阶段禁止 rule_expert(action=execute)；规则池由 req_rule_pool_build_rule_draft / req_rule_decision_submit / req_rule_pool_build_table_draft / req_table_decision_submit Builder 生成，最终验证调用 req_finalize_artifacts。"
+      },
+      {
+        "tool": "search_codebase",
+        "argField": "query",
+        "regex": "req_rule_pool_build_rule_draft|req_rule_decision_submit|req_rule_pool_build_table_draft|req_table_decision_submit|req_prepare_context|req_finalize_artifacts|design_prepare_context|design_tdd_skeleton_materialize|design_tdd_build_plan|rule_expert|MCP\\s*tool",
+        "reason": "MCP 工具名是已知常量，直接调用即可；禁止搜索工具名、查找工具实现或确认工具是否存在。"
+      },
+      {
+        "tool": "file_search",
+        "argField": "query",
+        "regex": "req_rule_pool_build_rule_draft|req_rule_decision_submit|req_rule_pool_build_table_draft|req_table_decision_submit|req_prepare_context|req_finalize_artifacts|design_prepare_context|design_tdd_skeleton_materialize|design_tdd_build_plan|rule_expert|MCP\\s*tool",
+        "reason": "MCP 工具名是已知常量，直接调用即可；禁止搜索工具名、查找工具实现或确认工具是否存在。"
+      },
+      {
+        "tool": "grep_search",
+        "argField": "query",
+        "regex": "req_rule_pool_build_rule_draft|req_rule_decision_submit|req_rule_pool_build_table_draft|req_table_decision_submit|req_prepare_context|req_finalize_artifacts|design_prepare_context|design_tdd_skeleton_materialize|design_tdd_build_plan|rule_expert|MCP\\s*tool",
+        "reason": "MCP 工具名是已知常量，直接调用即可；禁止搜索工具名、查找工具实现或确认工具是否存在。"
+      },
+      {
+        "tool": "search_by_regex",
+        "argField": "query",
+        "regex": "req_rule_pool_build_rule_draft|req_rule_decision_submit|req_rule_pool_build_table_draft|req_table_decision_submit|req_prepare_context|req_finalize_artifacts|design_prepare_context|design_tdd_skeleton_materialize|design_tdd_build_plan|rule_expert|MCP\\s*tool",
+        "reason": "MCP 工具名是已知常量，直接调用即可；禁止搜索工具名、查找工具实现或确认工具是否存在。"
+      }
+    ],
+    "blockReason": "epoint-requirement-analyzer 是纯业务分析阶段，输入只有用户对话和已写入的 demand/analysis-state.json；允许 rule_expert 做 Story 级规则召回，但仍只允许读写 .ai-workspace/project/、projectrules/、.kiro/、skills/、AGENTS.md 范围；禁止扫描或读取任何项目源码、HTML、SQL、POM、构建产物或 r2c 施工产物；禁止运行命令；禁止使用 IDE 原生 write/edit_file（全量覆盖会丢前面 Step 的内容），累积型产物必须用 fs_append 或 str_replace。验证 .active-demand / demand 目录里的文件请用 read_file 或 view_files 精确读，不要用 search 类工具试探。"
+  }
+}

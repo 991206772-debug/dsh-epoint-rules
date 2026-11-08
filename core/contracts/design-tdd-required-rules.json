@@ -1,0 +1,86 @@
+{
+  "schemaVersion": "design-tdd-required-rules/v1",
+  "description": "epoint-design-tdd-coder 编码阶段必备规则配置。模板规则按 fileKind 固定注入；基础能力规则按 appliesToFileKinds 注入，便于后续追加。",
+  "hintLimits": {
+    "maxHintsPerCard": 3,
+    "methodsPerRule": 8,
+    "methodsPerCardHint": 4,
+    "actionsPerHint": 8,
+    "actionsPerCardHint": 6,
+    "forbiddenPerHint": 8,
+    "forbiddenPerCardHint": 5,
+    "triggerTermsPerHint": 8,
+    "ruleRefsPerCard": 6,
+    "ruleRefsPerHint": 3,
+    "tableNamesPerHint": 4,
+    "entityNamesPerHint": 4,
+    "intentKeywordsPerHint": 8,
+    "intentKeywordsPerCardHint": 6,
+    "signatureChars": 300,
+    "summaryChars": 120,
+    "descriptionChars": 140,
+    "maxCandidatesPerCard": 4,
+    "maxUnknownFileKindCandidates": 2,
+    "candidateSignatureChars": 160,
+    "candidateReasonChars": 80
+  },
+  "fileKindTemplateRules": {
+    "Action": [
+      "代码生成规范-后端控制层"
+    ],
+    "ServiceApi": [
+      "代码生成规范-后端实体层"
+    ],
+    "ServiceInternal": [
+      "代码生成规范-后端实体层"
+    ],
+    "ServiceImpl": [
+      "代码生成规范-后端实体层"
+    ],
+    "Rest": [
+      "REST接口开发规范"
+    ],
+    "Job": [
+      "定时任务Job开发规范"
+    ],
+    "Entity": [
+      "代码生成规范-后端实体层"
+    ],
+    "HtmlPage": [
+      "代码生成规范-前端页面"
+    ]
+  },
+  "requiredRules": [
+    {
+      "ruleAlias": "前端API-开发手册",
+      "appliesToFileKinds": [
+        "HtmlPage"
+      ],
+      "reason": "只有 HtmlPage 写前端交互时才需要 epoint / Util 等前端 API。"
+    },
+    {
+      "ruleAlias": "UserSession使用规范",
+      "appliesToFileKinds": [
+        "Action"
+      ],
+      "reason": "Action 经常需要读取当前用户信息，必须优先使用规范中定义的方法名。"
+    },
+    {
+      "ruleAlias": "SqlConditionUtil使用规范",
+      "appliesToFileKinds": [
+        "Action",
+        "Rest",
+        "Job",
+        "ServiceInternal"
+      ],
+      "reason": "后端 Java 文件只要涉及 conditionMap / SQL 条件组装，都必须优先使用 SqlConditionUtil；Action/Rest/Job/ServiceInternal 都可能承载。"
+    },
+    {
+      "ruleAlias": "ICommonDao使用规范",
+      "appliesToFileKinds": [
+        "ServiceInternal"
+      ],
+      "reason": "数据库访问只允许在 ServiceInternal 层通过 ICommonDao/CommonDao.getInstance() 承载。"
+    }
+  ]
+}

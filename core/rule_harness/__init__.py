@@ -1,0 +1,1 @@
+"""Rule contract harness package."""

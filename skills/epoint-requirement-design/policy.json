@@ -1,0 +1,54 @@
+{
+  "skillName": "epoint-requirement-design",
+  "version": "2.1",
+  "globalRestrictions": {
+    "forbiddenToolCategories": ["search", "command"],
+    "forbiddenTools": ["write", "edit_file", "edit_file_search_replace", "fs_write", "fs_append", "str_replace"],
+    "allowedTools": ["read_file", "view_files"],
+    "forbiddenArgPatterns": [
+      {
+        "tool": "rule_expert",
+        "argField": "action",
+        "regex": "^(?:[Aa][Nn][Aa][Ll][Yy][Zz][Ee]|[Ee][Xx][Ee][Cc][Uu][Tt][Ee])$",
+        "reason": "设计阶段只消费Requirement已确认的demand/rule-pool.json事实；禁止重新做规则意图检索。先无phase调用design_prepare_context恢复并读取currentCardRef；按当前卡依次提交stepId+decisionRows、stepId+detailRows、stepId+compositionRows。"
+      },
+      {
+        "tool": "rule_expert",
+        "argField": "parameters",
+        "regex": "\"action\"\\s*:\\s*\"(?:[Aa][Nn][Aa][Ll][Yy][Zz][Ee]|[Ee][Xx][Ee][Cc][Uu][Tt][Ee])\"",
+        "reason": "设计阶段只消费Requirement已确认的demand/rule-pool.json事实；禁止重新做规则意图检索。先无phase调用design_prepare_context恢复并读取currentCardRef；按当前卡依次提交stepId+decisionRows、stepId+detailRows、stepId+compositionRows。"
+      },
+      {
+        "tool": "file_search",
+        "argField": "file_pattern",
+        "regex": "(?:^|[\\\\/])(?:demand|design|code)(?:[\\\\/]|$)|\\.ai-workspace|\\.active-demand|\\*\\*/.*\\.json",
+        "reason": "禁止搜索阶段目录和机器产物；只精确读取currentCardRef及受管证据引用，页面分片沿nextRef完整读取；storyEvidenceIndexRef只在恢复或矛盾时定向使用。"
+      },
+      {
+        "tool": "search_by_regex",
+        "argField": "query",
+        "regex": "design_prepare_context|design[-_]?submit|stories\\.json|rule-pool\\.json|\\.active-demand|设计文档",
+        "reason": "禁止搜索工具名或阶段产物；先无phase调用design_prepare_context恢复，精确读取currentCardRef，再携带当前stepId和decisionRows/detailRows/compositionRows按卡片推进。搜索失败不能推断工具不可用。"
+      },
+      {
+        "tool": "grep_search",
+        "argField": "query",
+        "regex": "design_prepare_context|design[-_]?submit|stories\\.json|rule-pool\\.json|\\.active-demand|设计文档",
+        "reason": "禁止搜索工具名或阶段产物；先无phase调用design_prepare_context恢复，精确读取currentCardRef，再携带当前stepId和decisionRows/detailRows/compositionRows按卡片推进。搜索失败不能推断工具不可用。"
+      },
+      {
+        "tool": "*",
+        "argField": "filePath",
+        "regex": "[\\\\/]design[\\\\/](?!\\.runtime[\\\\/]).*\\.(?:json|md)$|\\.active-demand$",
+        "reason": "Design最终产物和active demand均为Builder-owned；LLM只能精确读取受管卡片，不能手写。"
+      },
+      {
+        "tool": "*",
+        "argField": "path",
+        "regex": "[\\\\/]design[\\\\/](?!\\.runtime[\\\\/]).*\\.(?:json|md)$|\\.active-demand$|[\\\\/]\\.ai-workspace[\\\\/].*[\\\\/]\\.ai-workspace(?:[\\\\/]|$)",
+        "reason": "禁止写Design最终产物、active demand或嵌套.ai-workspace。"
+      }
+    ],
+    "blockReason": "Design只读Requirement结构化事实和受管卡片；唯一推进/恢复入口是design_prepare_context。LLM不得搜索阶段目录、手写Design runtime/最终产物或创建嵌套.ai-workspace。"
+  }
+}
